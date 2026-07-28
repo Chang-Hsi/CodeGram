@@ -13,6 +13,7 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxt/image',
     'shadcn-nuxt',
+    '@nuxtjs/supabase',
   ],
 
   css: [
@@ -28,5 +29,11 @@ export default defineNuxtConfig({
   shadcn: {
     prefix: '',
     componentDir: '@/components/ui',
+  },
+
+  supabase: {
+    redirect: false,
+    useSsrCookies: true,
+    types: false,
   },
 })
