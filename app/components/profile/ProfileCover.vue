@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Fripplebutton from '~/components/common/button/Fripplebutton.vue'
+
 const props = withDefaults(
   defineProps<{
     coverUrl?: string
@@ -82,7 +84,9 @@ onBeforeUnmount(() => {
       />
     </div>
 
-    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/30 via-transparent to-transparent" />
+    <div
+      class="absolute inset-0 bg-gradient-to-t from-slate-950/30 via-transparent to-transparent"
+    />
 
     <input
       ref="fileInputRef"
@@ -92,18 +96,25 @@ onBeforeUnmount(() => {
       @change="handleFileChange"
     >
 
-    <button
+    <!-- 改用 Fripplebutton -->
+    <Fripplebutton
       v-if="isOwnProfile"
       type="button"
-      class="absolute bottom-4 right-4 flex h-10 items-center gap-2 rounded-lg bg-white/95 px-4 text-sm font-semibold text-slate-800 shadow-sm backdrop-blur transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-white/40"
+      ripple-color="rgba(15, 23, 42, 0.22)"
+      :duration="600"
+      class="absolute bottom-4 right-4 h-10 rounded-lg bg-white/95 px-4 text-sm font-semibold text-slate-800 shadow-sm backdrop-blur transition hover:bg-white focus:outline-none focus-visible:ring-4 focus-visible:ring-white/40"
       @click="openFilePicker"
     >
-      <Icon
-        name="lucide:camera"
-        class="size-4"
-      />
+      <span class="flex items-center gap-2">
+        <Icon
+          name="lucide:camera"
+          class="size-4"
+        />
 
-      <span class="hidden sm:inline">編輯封面相片</span>
-    </button>
+        <span class="hidden sm:inline">
+          編輯封面相片
+        </span>
+      </span>
+    </Fripplebutton>
   </div>
 </template>

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Iconbutton from '~/components/common/button/Iconbutton.vue'
+
 const props = withDefaults(
   defineProps<{
     avatarUrl?: string
@@ -69,10 +71,6 @@ const formatNumber = (value: number) => {
           {{ displayName }}
         </h1>
 
-        <p class="mt-1 text-sm font-medium text-slate-500">
-          @{{ username }}
-        </p>
-
         <p
           v-if="headline"
           class="mt-2 text-sm text-slate-600"
@@ -115,18 +113,16 @@ const formatNumber = (value: number) => {
       <div
         class="mt-5 flex items-center justify-center gap-2 md:mb-1 md:ml-4"
       >
-        <NuxtLink
+        <!-- 改用 Iconbutton -->
+        <Iconbutton
           v-if="isOwnProfile"
           to="/settings/profile"
-          class="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white transition hover:bg-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/20 md:flex-none"
+          icon="lucide:pencil"
+          size="compact"
+          class="flex-1 md:flex-none"
         >
-          <Icon
-            name="lucide:pencil"
-            class="size-4"
-          />
-
           編輯個人資料
-        </NuxtLink>
+        </Iconbutton>
 
         <template v-else>
           <button
