@@ -15,6 +15,7 @@ defineOptions({
 interface VercelTab<TValue extends string> {
   label: string
   value: TValue
+  icon?: string
   disabled?: boolean
 }
 
@@ -28,9 +29,15 @@ const props = withDefaults(
     modelValue: T
     tabs: readonly VercelTab<T>[]
     ariaLabel?: string
+    iconOnly?: boolean
+    iconSize?: number
+    appearance?: 'default' | 'navigation'
   }>(),
   {
     ariaLabel: '內容分頁',
+    iconOnly: false,
+    iconSize: 20,
+    appearance: 'default',
   },
 )
 
@@ -362,25 +369,53 @@ onBeforeUnmount(() => {
           :aria-selected="modelValue === tab.value"
           :disabled="tab.disabled"
           :tabindex="modelValue === tab.value ? 0 : -1"
-          class="relative z-10 flex h-12 shrink-0 items-center justify-center px-4 text-sm font-medium outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-40 sm:px-5"
-          :class="
-            modelValue === tab.value
-              ? 'text-slate-950'
-              : 'text-slate-500 hover:text-slate-900'
+          :aria-label="
+            iconOnly
+              ? tab.label
+              : undefined
           "
+          class="relative z-10 flex shrink-0 items-center justify-center gap-2 text-sm font-medium outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-40"
+          :class="[
+            appearance === 'navigation'
+              ? 'h-14 min-w-[82px] flex-1 px-3 sm:min-w-[92px] lg:min-w-0'
+              : 'h-12 px-4 sm:px-5',
+            modelValue === tab.value
+              ? appearance === 'navigation'
+                ? 'text-blue-600'
+                : 'text-slate-950'
+              : 'text-slate-500 hover:text-slate-900',
+          ]"
           @click="selectTab(index)"
           @pointerenter="handlePointerEnter(index)"
           @focus="handleFocus(index)"
           @blur="handleBlur"
           @keydown="handleKeydown($event, index)"
         >
-          {{ tab.label }}
+          <Icon
+            v-if="tab.icon"
+            :name="tab.icon"
+            class="shrink-0"
+            :style="{
+              width: `${iconSize}px`,
+              height: `${iconSize}px`,
+              fontSize: `${iconSize}px`,
+            }"
+          />
+
+          <span :class="iconOnly ? 'sr-only' : ''">
+            {{ tab.label }}
+          </span>
         </button>
 
         <!-- 目前選取分頁的滑動底線 -->
         <span
           aria-hidden="true"
-          class="pointer-events-none absolute bottom-[-1px] left-0 z-20 h-0.5 bg-slate-950 transition-[width,transform,opacity] duration-300 ease-out"
+          class="pointer-events-none absolute bottom-[-1px] left-0 z-20 transition-[width,transform,opacity] duration-300 ease-out"
+          :class="
+            appearance === 'navigation'
+              ? 'h-[3px] rounded-full bg-blue-600'
+              : 'h-0.5 bg-slate-950'
+          "
           :style="selectedIndicatorStyle"
         />
       </div>
