@@ -1,4 +1,11 @@
 <script setup lang="ts">
+import CtaMarquee from "~/components/common/card/CtaMarquee.vue";
+import type {
+  EducationExperience,
+  ProfileProject,
+  WorkExperience,
+} from "~/types/profile";
+
 definePageMeta({
   layout: false,
 });
@@ -62,38 +69,219 @@ const profile = reactive({
   ],
 });
 
+const workExperiences = ref<WorkExperience[]>([
+  {
+    id: "pixelcraft-frontend",
+    company: "PixelCraft Studio",
+    jobTitle: "初階前端工程師",
+    startDate: "2018-07-01",
+    endDate: "2020-03-31",
+    description:
+      "參與品牌官網與活動頁開發，建立共用 UI 元件，並改善行動裝置的載入速度與操作體驗。",
+    tags: ["JavaScript", "HTML", "CSS"],
+  },
+  {
+    id: "cloudtech-frontend",
+    company: "CloudTech Solutions",
+    jobTitle: "前端工程師",
+    startDate: "2020-04-01",
+    endDate: "2022-08-31",
+    description:
+      "負責企業後台系統前端架構，導入 Vue 3 與 TypeScript，降低重複程式碼並提升團隊交付效率。",
+    tags: ["Vue 3", "TypeScript", "Pinia"],
+  },
+  {
+    id: "nextwave-senior-frontend",
+    company: "NextWave Digital",
+    jobTitle: "資深前端工程師",
+    startDate: "2022-09-01",
+    endDate: "2024-12-31",
+    description:
+      "主導設計系統與前端效能優化，協助建立程式碼審查流程，並帶領團隊完成多項核心產品改版。",
+    tags: ["Nuxt", "Design System", "Web Performance"],
+  },
+  {
+    id: "codegram-current",
+    company: "CodeGram",
+    jobTitle: "前端工程師",
+    startDate: "2025-01-01",
+    description:
+      "負責 CodeGram 社群產品的前端開發與架構設計，持續改善個人檔案、貼文與互動功能的使用者體驗。",
+    tags: ["Nuxt", "Vue 3", "TypeScript"],
+  },
+]);
+
+const educationExperiences = ref<EducationExperience[]>([
+  {
+    id: "elementary-school",
+    school: "桃園市立青溪國民小學",
+    educationLevel: "國小",
+    startDate: "2005-09-01",
+    endDate: "2011-06-30",
+    description: "完成基礎教育，參與校內資訊與閱讀相關活動。",
+    tags: ["基礎教育"],
+  },
+  {
+    id: "junior-high-school",
+    school: "桃園市立青溪國民中學",
+    educationLevel: "國中",
+    startDate: "2011-09-01",
+    endDate: "2014-06-30",
+    description: "開始接觸程式設計與資訊科技，參與校內電腦社團。",
+    tags: ["資訊科技", "電腦社"],
+  },
+  {
+    id: "senior-high-school",
+    school: "國立桃園高級中等學校",
+    educationLevel: "高中",
+    startDate: "2014-09-01",
+    endDate: "2017-06-30",
+    description: "修習自然科學與資訊課程，完成校內網站專題。",
+    tags: ["自然組", "網站專題"],
+  },
+  {
+    id: "university",
+    school: "國立臺北科技大學",
+    educationLevel: "大學",
+    startDate: "2017-09-01",
+    endDate: "2021-06-30",
+    description: "主修資訊工程，專注於網頁應用、軟體工程與使用者介面開發。",
+    tags: ["資訊工程", "軟體工程", "Web"],
+  },
+  {
+    id: "graduate-school",
+    school: "國立臺灣科技大學",
+    educationLevel: "研究所",
+    startDate: "2021-09-01",
+    endDate: "2023-06-30",
+    description: "研究前端架構與人機互動，完成以 Web 使用者體驗為主題的論文。",
+    tags: ["人機互動", "前端架構", "UX"],
+  },
+]);
+
+const hobbies = ref(["reading", "music", "photography"]);
+const hobbyOther = ref("");
+
+const interests = ref(["frontend", "ai", "open-source"]);
+const interestOther = ref("");
+
 const isOwnProfile = computed(() => {
   // 第一版先視為目前登入會員自己的頁面。
   // 日後建立會員 Store 後，再與登入會員 username 比對。
   return true;
 });
 
-const projects = [
+const createProjectImages = (projectKey: string) => {
+  return Array.from({ length: 8 }, (_, index) => {
+    return `https://picsum.photos/seed/codegram-${projectKey}-${index + 1}/960/720`;
+  });
+};
+
+const projects: ProfileProject[] = [
   {
     id: 1,
-    name: "my-portfolio",
+    name: "TW Douli Portfolio",
     description:
-      "TW Douli Portfolio 是一個個人作品集網站，主要用來展示個人介紹、服務項目、技術堆疊、參與專案與作品詳情。",
-    technologies: ["Nuxt", "TypeScript", "Tailwind CSS"],
+      "個人作品集網站，用來展示個人介紹、服務項目、技術堆疊、參與專案與作品詳情，並針對不同裝置提供響應式瀏覽體驗。",
+    technologies: ["Nuxt", "Vue 3", "TypeScript", "Tailwind CSS", "Vercel"],
+    technologyLogos: [
+      { name: "Nuxt", icon: "logos:nuxt-icon" },
+      { name: "Vue 3", icon: "logos:vue" },
+      { name: "TypeScript", icon: "logos:typescript-icon" },
+      { name: "Tailwind CSS", icon: "logos:tailwindcss-icon" },
+      { name: "Vercel", icon: "logos:vercel-icon" },
+    ],
+    images: [
+      "https://i.pinimg.com/736x/b4/ad/7e/b4ad7ed353ff737c9ff76145cfaa9ab8.jpg",
+      "https://i.pinimg.com/736x/18/07/30/1807304d7c1a8395707451fbdd7012f2.jpg",
+      "https://i.pinimg.com/1200x/b0/c0/92/b0c09230630c07244677284b1c56ead1.jpg",
+      "https://i.pinimg.com/736x/b5/a7/10/b5a71051311ed8a1e9fe59fd228f6ae3.jpg",
+      "https://i.pinimg.com/1200x/eb/8c/6f/eb8c6f33fca096148882bd939e50f2d8.jpg",
+      "https://i.pinimg.com/1200x/f8/bb/23/f8bb23c4f59ada471fb76ba145de835c.jpg",
+      "https://i.pinimg.com/1200x/0e/ac/05/0eac0533cc045dc4b6eb70a0edaf2c26.jpg",
+      "https://i.pinimg.com/736x/0d/94/26/0d9426f57994ef83507a706d1e0ba2b9.jpg",
+    ],
     url: "https://my-portfolio-liard-two-87.vercel.app/",
-    accentColor: "#389dc6",
+    accentColor: "#db4b82",
   },
   {
     id: 2,
-    name: "e-shopping",
+    name: "E-Shopping",
     description:
-      "商城系統，包含篩選商品、品牌（商城）、票券、訂單、優惠券、評價、購物車等企劃實作。",
-    technologies: ["Vue 3", "Pinia", "Vite"],
+      "完整的電子商城系統，包含商品與品牌篩選、購物車、票券、優惠券、訂單管理及商品評價等功能。",
+    technologies: ["Vue 3", "Pinia", "Vite", "TypeScript", "JavaScript"],
+    technologyLogos: [
+      { name: "Vue 3", icon: "logos:vue" },
+      { name: "Pinia", icon: "logos:pinia" },
+      { name: "Vite", icon: "logos:vitejs" },
+      { name: "TypeScript", icon: "logos:typescript-icon" },
+      { name: "JavaScript", icon: "logos:javascript" },
+    ],
+    images: [
+      "https://i.pinimg.com/1200x/3e/c8/4e/3ec84efae92ecd030b3fbae143e7fe14.jpg",
+      "https://i.pinimg.com/736x/7d/d5/d2/7dd5d2e3907724b9495bd9a021a661d2.jpg",
+      "https://i.pinimg.com/736x/7e/81/68/7e816850ec67b8daa6a154984c2c35f0.jpg",
+      "https://i.pinimg.com/736x/4d/7b/df/4d7bdfe815dc23adecee5c68e0b11f49.jpg",
+      "https://i.pinimg.com/736x/ff/ae/f8/ffaef81fc7bf7bb9d24653fc399a97da.jpg",
+      "https://i.pinimg.com/736x/7a/2e/86/7a2e86beefb5eeb52ad6db8e9c238e0b.jpg",
+      "https://i.pinimg.com/1200x/01/3a/de/013ade27b955c777a3d84264c2f4099c.jpg",
+      "https://i.pinimg.com/736x/77/4a/e8/774ae85fbd8e47f7e445a39f0b4a028a.jpg",
+    ],
     url: "https://e-shopping-liart.vercel.app/",
-    accentColor: "#ee4d2d",
+    accentColor: "#6c5ce7",
   },
   {
     id: 3,
-    name: "CRM SYSTEM",
-    description: "本CRM系統之核心目標，是建立一套 B2B 的整合型營運平台，涵蓋客戶管理、商機管理、夥伴管理等功能。",
-    technologies: ["Nuxt", "Supabase", "Stripe"],
+    name: "CRM System",
+    description:
+      "提供 B2B 客戶管理、商機追蹤、夥伴管理與營運資料整合的管理平台，協助團隊集中處理客戶與業務流程。",
+    technologies: ["Nuxt", "Supabase", "PostgreSQL", "Stripe", "TypeScript"],
+    technologyLogos: [
+      { name: "Nuxt", icon: "logos:nuxt-icon" },
+      { name: "Supabase", icon: "logos:supabase-icon" },
+      { name: "PostgreSQL", icon: "logos:postgresql" },
+      { name: "Stripe", icon: "logos:stripe" },
+      { name: "TypeScript", icon: "logos:typescript-icon" },
+    ],
+    images: [
+      "https://i.pinimg.com/736x/fd/98/51/fd9851dfb5f7dc14bcba2ad31ed0ecc9.jpg",
+      "https://i.pinimg.com/736x/6f/98/15/6f98150fef526ad2fc0f7c1044ec74f9.jpg",
+      "https://i.pinimg.com/736x/51/c7/fb/51c7fbabd996c949b2634a6a31cbd36b.jpg",
+      "https://i.pinimg.com/1200x/60/50/53/6050538302aa73d0f77d4896a28e104c.jpg",
+      "https://i.pinimg.com/1200x/60/54/05/605405d1b801db2341decd0c379cee7e.jpg",
+      "https://i.pinimg.com/736x/13/59/35/135935eb980a797f0f1219a48d703884.jpg",
+      "https://i.pinimg.com/1200x/49/ec/b6/49ecb6925da7b1ff43c763445aba3ca2.jpg",
+      "https://i.pinimg.com/1200x/1c/49/c6/1c49c653e5a5813b2fc5f0e9703298a8.jpg",
+    ],
     url: "https://crm-liard-gamma.vercel.app/",
-    accentColor: "#ffffff",
+    accentColor: "#4f8edc",
+  },
+  {
+    id: 4,
+    name: "CodeGram",
+    description:
+      "以軟體工程師為核心的技術社群，提供個人檔案、技術貼文、專案展示、互動回覆與工程師交流功能。",
+    technologies: ["Nuxt", "Vue 3", "Pinia", "Supabase", "Tailwind CSS", "TypeScript"],
+    technologyLogos: [
+      { name: "Nuxt", icon: "logos:nuxt-icon" },
+      { name: "Vue 3", icon: "logos:vue" },
+      { name: "Pinia", icon: "logos:pinia" },
+      { name: "Supabase", icon: "logos:supabase-icon" },
+      { name: "Tailwind CSS", icon: "logos:tailwindcss-icon" },
+      { name: "TypeScript", icon: "logos:typescript-icon" },
+    ],
+    images: [
+      "https://i.pinimg.com/736x/0c/53/b0/0c53b061b245dafdf696f2201beb0338.jpg",
+      "https://i.pinimg.com/1200x/14/20/0a/14200aaad3727065aafdee8ada87ee5f.jpg",
+      "https://i.pinimg.com/736x/19/39/06/19390603f5fe1d8b0b149cffee0d8648.jpg",
+      "https://i.pinimg.com/1200x/09/78/37/0978378253f29ceb9ed6b20d058f2e09.jpg",
+      "https://i.pinimg.com/1200x/27/d6/d3/27d6d3ea4d361eaa2ab0f1d78bcc511b.jpg",
+      "https://i.pinimg.com/1200x/00/64/ee/0064eea637e208a93c816ce148e36023.jpg",
+      "https://i.pinimg.com/1200x/3a/0b/01/3a0b019ea7a4a6f64499a6c4caf1aa6c.jpg",
+      "https://i.pinimg.com/736x/7c/88/fa/7c88fa3a92d3828338cff02d460c7747.jpg",
+    ],
+    url: "https://example.com/",
+    accentColor: "#7367f0",
   },
 ];
 
@@ -195,9 +383,7 @@ const handleCoverSelected = (file: File) => {
   console.log("Selected cover file:", file.name);
 };
 
-const handleSaveIntro = (payload: {
-  bio: string;
-}) => {
+const handleSaveIntro = (payload: { bio: string }) => {
   profile.bio = payload.bio;
 };
 
@@ -211,6 +397,48 @@ const handleSaveDetails = (payload: {
   profile.username = payload.username;
   profile.headline = payload.headline;
   profile.location = payload.location;
+};
+
+const handleSaveWorkExperiences = (experiences: WorkExperience[]) => {
+  workExperiences.value = experiences;
+
+  const currentExperience = experiences.find(
+    (experience) => !experience.endDate,
+  );
+  const latestExperience = [...experiences].sort((experienceA, experienceB) => {
+    return experienceB.startDate.localeCompare(experienceA.startDate);
+  })[0];
+
+  profile.work = currentExperience?.company || latestExperience?.company || "";
+};
+
+const handleSaveEducationExperiences = (experiences: EducationExperience[]) => {
+  educationExperiences.value = experiences;
+
+  const currentEducation = experiences.find(
+    (experience) => !experience.endDate,
+  );
+  const latestEducation = [...experiences].sort((educationA, educationB) => {
+    return educationB.startDate.localeCompare(educationA.startDate);
+  })[0];
+
+  profile.education = currentEducation?.school || latestEducation?.school || "";
+};
+
+const handleSaveHobbies = (payload: {
+  values: string[];
+  customValue: string;
+}) => {
+  hobbies.value = payload.values;
+  hobbyOther.value = payload.customValue;
+};
+
+const handleSaveInterests = (payload: {
+  values: string[];
+  customValue: string;
+}) => {
+  interests.value = payload.values;
+  interestOther.value = payload.customValue;
 };
 
 watch(routeUsername, (username) => {
@@ -331,24 +559,31 @@ useSeoMeta({
       </div>
 
       <!-- 關於分頁 -->
-      <div
-        v-else-if="activeTab === 'about'"
-        class="space-y-4"
-      >
+      <div v-else-if="activeTab === 'about'" class="space-y-4">
         <ProfileAboutSection
           :display-name="profile.displayName"
           :username="profile.username"
           :bio="profile.bio"
           :headline="profile.headline"
           :work="profile.work"
+          :work-experiences="workExperiences"
+          :education-experiences="educationExperiences"
           :education="profile.education"
           :location="profile.location"
           :website="profile.website"
           :github-url="profile.githubUrl"
           :skills="profile.skills"
+          :hobbies="hobbies"
+          :hobby-other="hobbyOther"
+          :interests="interests"
+          :interest-other="interestOther"
           :is-own-profile="isOwnProfile"
           @save-intro="handleSaveIntro"
           @save-details="handleSaveDetails"
+          @save-work-experiences="handleSaveWorkExperiences"
+          @save-education-experiences="handleSaveEducationExperiences"
+          @save-hobbies="handleSaveHobbies"
+          @save-interests="handleSaveInterests"
         />
 
         <ProfileFriendsSection :is-own-profile="isOwnProfile" />
@@ -357,79 +592,25 @@ useSeoMeta({
       </div>
 
       <!-- 專案分頁 -->
-      <section
+      <div
         v-else-if="activeTab === 'projects'"
-        class="rounded-xl bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.08)] sm:p-6"
+        class="space-y-6"
       >
-        <div class="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h2 class="text-xl font-bold text-slate-950">專案作品</h2>
+        <CtaMarquee
+          v-for="project in projects"
+          :key="project.id"
+          :project="project"
+          :speed="34"
+          pause-on-hover
+        />
 
-            <p class="mt-1 text-sm text-slate-500">
-              個人開發與參與過的精選專案。
-            </p>
-          </div>
-
-          <button
-            v-if="isOwnProfile"
-            type="button"
-            class="flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white transition hover:bg-blue-500"
-          >
-            <Icon name="lucide:plus" class="size-4" />
-
-            新增專案
-          </button>
+        <div
+          v-if="!projects.length"
+          class="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center text-sm text-slate-500"
+        >
+          尚未新增專案作品
         </div>
-
-        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <a
-            v-for="project in projects"
-            :key="project.id"
-            :href="project.url"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="group overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
-          >
-            <div
-              class="flex h-36 items-center justify-center"
-              :style="{
-                background: `linear-gradient(135deg, ${project.accentColor}, ${project.accentColor}bb)`,
-              }"
-            >
-              <Icon name="lucide:code-xml" class="size-12 text-white/90" />
-            </div>
-
-            <div class="p-4">
-              <div class="flex items-start justify-between gap-3">
-                <h3
-                  class="font-semibold text-slate-950 group-hover:text-blue-600"
-                >
-                  {{ project.name }}
-                </h3>
-
-                <Icon
-                  name="lucide:external-link"
-                  class="size-4 shrink-0 text-slate-400"
-                />
-              </div>
-
-              <p class="mt-2 line-clamp-3 text-sm leading-6 text-slate-500">
-                {{ project.description }}
-              </p>
-
-              <div class="mt-4 flex flex-wrap gap-1.5">
-                <span
-                  v-for="technology in project.technologies"
-                  :key="technology"
-                  class="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600"
-                >
-                  {{ technology }}
-                </span>
-              </div>
-            </div>
-          </a>
-        </div>
-      </section>
+      </div>
 
       <!-- 回覆分頁 -->
       <div v-else class="mx-auto max-w-[680px] space-y-4">

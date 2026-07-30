@@ -9,6 +9,10 @@ const props = withDefaults(
     icon?: string
     type?: 'button' | 'submit' | 'reset'
     size?: 'default' | 'compact'
+    variant?: 'primary' | 'ghost' | 'danger-ghost'
+    iconOnly?: boolean
+    iconClass?: string
+    animateIcon?: boolean
     disabled?: boolean
   }>(),
   {
@@ -16,6 +20,10 @@ const props = withDefaults(
     icon: 'lucide:phone-call',
     type: 'button',
     size: 'default',
+    variant: 'primary',
+    iconOnly: false,
+    iconClass: '',
+    animateIcon: true,
     disabled: false,
   },
 )
@@ -46,6 +54,12 @@ const componentBindings = computed(() => {
 })
 
 const sizeClasses = computed(() => {
+  if (props.iconOnly) {
+    return props.size === 'compact'
+      ? 'size-9 rounded-full p-0'
+      : 'size-11 rounded-full p-0'
+  }
+
   if (props.size === 'compact') {
     return 'h-10 rounded-lg px-4 text-sm'
   }
@@ -57,6 +71,18 @@ const iconSizeClasses = computed(() => {
   return props.size === 'compact'
     ? 'size-4'
     : 'size-5'
+})
+
+const variantClasses = computed(() => {
+  if (props.variant === 'ghost') {
+    return 'border-transparent bg-transparent text-slate-500 shadow-none hover:bg-transparent hover:text-blue-600 hover:shadow-none focus-visible:ring-blue-500/20'
+  }
+
+  if (props.variant === 'danger-ghost') {
+    return 'border-transparent bg-transparent text-slate-500 shadow-none hover:bg-transparent hover:text-red-600 hover:shadow-none focus-visible:ring-red-500/20'
+  }
+
+  return 'border-blue-500/20 bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg hover:from-blue-700 hover:to-blue-800 hover:shadow-xl focus-visible:ring-blue-500/30'
 })
 
 const handleClick = (event: MouseEvent) => {
@@ -77,8 +103,11 @@ const handleClick = (event: MouseEvent) => {
       ...componentBindings,
       ...$attrs,
     }"
-    class="icon-button group relative inline-flex items-center justify-center overflow-hidden border border-blue-500/20 bg-gradient-to-r from-blue-600 to-blue-700 font-semibold text-white shadow-lg transition-all duration-300 ease-out hover:from-blue-700 hover:to-blue-800 hover:shadow-xl focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/30 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
-    :class="sizeClasses"
+    class="icon-button group relative inline-flex items-center justify-center overflow-hidden border font-semibold transition-all duration-300 ease-out focus:outline-none focus-visible:ring-4 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+    :class="[
+      sizeClasses,
+      variantClasses,
+    ]"
     @click="handleClick"
   >
     <span
@@ -93,19 +122,30 @@ const handleClick = (event: MouseEvent) => {
       >
         <Icon
           :name="icon"
-          class="icon-button__icon icon-button__icon--primary absolute inset-0 text-white"
-          :class="iconSizeClasses"
+          class="absolute inset-0"
+          :class="[
+            iconSizeClasses,
+            iconClass,
+            animateIcon
+              ? 'icon-button__icon icon-button__icon--primary'
+              : '',
+          ]"
         />
 
         <Icon
+          v-if="animateIcon"
           :name="icon"
-          class="icon-button__icon icon-button__icon--secondary absolute inset-0 text-white"
-          :class="iconSizeClasses"
+          class="icon-button__icon icon-button__icon--secondary absolute inset-0"
+          :class="[
+            iconSizeClasses,
+            iconClass,
+          ]"
         />
       </span>
 
       <!-- 按鈕文字 -->
       <span
+        v-if="!iconOnly"
         class="whitespace-nowrap transition-transform duration-300 ease-out group-hover:translate-x-1"
       >
         <slot />
@@ -114,6 +154,7 @@ const handleClick = (event: MouseEvent) => {
 
     <!-- Hover 掃光效果 -->
     <span
+      v-if="variant === 'primary'"
       aria-hidden="true"
       class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
     >

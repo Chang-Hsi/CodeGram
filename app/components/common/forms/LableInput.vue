@@ -14,7 +14,8 @@ type InputType =
   | "search"
   | "tel"
   | "url"
-  | "number";
+  | "number"
+  | "date";
 
 const props = withDefaults(
   defineProps<{

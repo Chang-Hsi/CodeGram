@@ -1,6 +1,11 @@
 <script setup lang="ts">
+import type {
+  EducationExperience,
+  WorkExperience,
+} from '~/types/profile'
 import ScrollspySidebar from '~/components/common/tabs/ScrollspySidebar.vue'
 import ProfileAboutDetailsTab from './about/ProfileAboutDetailsTab.vue'
+import ProfileAboutEducationTab from './about/ProfileAboutEducationTab.vue'
 import ProfileAboutExperienceTab from './about/ProfileAboutExperienceTab.vue'
 import ProfileAboutIdentityTab from './about/ProfileAboutIdentityTab.vue'
 import ProfileAboutIntroTab from './about/ProfileAboutIntroTab.vue'
@@ -15,7 +20,6 @@ type AboutSection =
   | 'education'
   | 'hobbies'
   | 'interests'
-  | 'travel'
   | 'links'
   | 'contact'
   | 'name'
@@ -44,6 +48,11 @@ interface SaveDetailsPayload {
   location: string
 }
 
+interface SaveLifestylePayload {
+  values: string[]
+  customValue: string
+}
+
 interface PinnedDetailDisplayItem {
   key: PinnedDetailKey
   icon: string
@@ -58,11 +67,17 @@ const props = withDefaults(
     bio?: string
     headline?: string
     work?: string
+    workExperiences?: WorkExperience[]
+    educationExperiences?: EducationExperience[]
     education?: string
     location?: string
     website?: string
     githubUrl?: string
     skills?: string[]
+    hobbies?: string[]
+    hobbyOther?: string
+    interests?: string[]
+    interestOther?: string
     pinnedDetails?: PinnedDetailKey[]
     bioDraftStorageKey?: string
     isOwnProfile?: boolean
@@ -71,11 +86,17 @@ const props = withDefaults(
     bio: '',
     headline: '',
     work: '',
+    workExperiences: () => [],
+    educationExperiences: () => [],
     education: '',
     location: '',
     website: '',
     githubUrl: '',
     skills: () => [],
+    hobbies: () => [],
+    hobbyOther: '',
+    interests: () => [],
+    interestOther: '',
     bioDraftStorageKey: '',
     isOwnProfile: false,
   },
@@ -84,6 +105,12 @@ const props = withDefaults(
 const emit = defineEmits<{
   saveIntro: [payload: SaveIntroPayload]
   saveDetails: [payload: SaveDetailsPayload]
+  saveWorkExperiences: [experiences: WorkExperience[]]
+  saveEducationExperiences: [
+    experiences: EducationExperience[],
+  ]
+  saveHobbies: [payload: SaveLifestylePayload]
+  saveInterests: [payload: SaveLifestylePayload]
 }>()
 
 const activeSection = ref<AboutSection>('intro')
@@ -92,6 +119,22 @@ const isEditingDetails = ref(false)
 
 const introTabRef = ref<
   InstanceType<typeof ProfileAboutIntroTab>
+>()
+
+const experienceTabRef = ref<
+  InstanceType<typeof ProfileAboutExperienceTab>
+>()
+
+const educationTabRef = ref<
+  InstanceType<typeof ProfileAboutEducationTab>
+>()
+
+const hobbiesTabRef = ref<
+  InstanceType<typeof ProfileAboutLifestyleTab>
+>()
+
+const interestsTabRef = ref<
+  InstanceType<typeof ProfileAboutLifestyleTab>
 >()
 
 const pinnedDetailKeys: PinnedDetailKey[] = [
@@ -115,7 +158,7 @@ const navigationItems: Array<{
     value: 'intro',
   },
   {
-    label: '個人詳細資料',
+    label: '個人資料',
     value: 'details',
   },
   {
@@ -135,10 +178,6 @@ const navigationItems: Array<{
     value: 'interests',
   },
   {
-    label: '旅遊',
-    value: 'travel',
-  },
-  {
     label: '連結',
     value: 'links',
   },
@@ -147,11 +186,11 @@ const navigationItems: Array<{
     value: 'contact',
   },
   {
-    label: '名字',
+    label: '介紹自己',
     value: 'name',
   },
   {
-    label: '你的相關資料',
+    label: '技術棧',
     value: 'related',
   },
 ]
@@ -846,6 +885,82 @@ watch(
             />
           </button>
 
+          <!-- 工作經歷 -->
+          <button
+            v-else-if="
+              isOwnProfile
+              && item.value === 'work'
+            "
+            type="button"
+            aria-label="編輯工作經歷"
+            class="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-blue-600"
+            @click="
+              experienceTabRef?.openEditor()
+            "
+          >
+            <Icon
+              name="lucide:pencil"
+              class="size-5"
+            />
+          </button>
+
+          <!-- 學歷 -->
+          <button
+            v-else-if="
+              isOwnProfile
+              && item.value === 'education'
+            "
+            type="button"
+            aria-label="編輯學歷"
+            class="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-blue-600"
+            @click="
+              educationTabRef?.openEditor()
+            "
+          >
+            <Icon
+              name="lucide:pencil"
+              class="size-5"
+            />
+          </button>
+
+          <!-- 嗜好 -->
+          <button
+            v-else-if="
+              isOwnProfile
+              && item.value === 'hobbies'
+            "
+            type="button"
+            aria-label="編輯嗜好"
+            class="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-blue-600"
+            @click="
+              hobbiesTabRef?.openEditor()
+            "
+          >
+            <Icon
+              name="lucide:pencil"
+              class="size-5"
+            />
+          </button>
+
+          <!-- 興趣 -->
+          <button
+            v-else-if="
+              isOwnProfile
+              && item.value === 'interests'
+            "
+            type="button"
+            aria-label="編輯興趣"
+            class="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-blue-600"
+            @click="
+              interestsTabRef?.openEditor()
+            "
+          >
+            <Icon
+              name="lucide:pencil"
+              class="size-5"
+            />
+          </button>
+
           <!-- 其他分類 -->
           <NuxtLink
             v-else-if="isOwnProfile"
@@ -954,25 +1069,42 @@ watch(
         <!-- 工作經歷 -->
         <template #work>
           <ProfileAboutExperienceTab
+            ref="experienceTabRef"
             section="work"
             :work="work"
+            :work-experiences="
+              workExperiences
+            "
             :education="education"
             :headline="headline"
             :empty-text="
               getEmptyText('工作經歷')
+            "
+            @save-work-experiences="
+              emit(
+                'saveWorkExperiences',
+                $event,
+              )
             "
           />
         </template>
 
         <!-- 學歷 -->
         <template #education>
-          <ProfileAboutExperienceTab
-            section="education"
-            :work="work"
+          <ProfileAboutEducationTab
+            ref="educationTabRef"
             :education="education"
-            :headline="headline"
+            :education-experiences="
+              educationExperiences
+            "
             :empty-text="
               getEmptyText('學歷')
+            "
+            @save-education-experiences="
+              emit(
+                'saveEducationExperiences',
+                $event,
+              )
             "
           />
         </template>
@@ -980,8 +1112,12 @@ watch(
         <!-- 嗜好 -->
         <template #hobbies>
           <ProfileAboutLifestyleTab
-            :empty-text="
-              getEmptyText('嗜好')
+            ref="hobbiesTabRef"
+            section="hobbies"
+            :values="hobbies"
+            :custom-value="hobbyOther"
+            @save="
+              emit('saveHobbies', $event)
             "
           />
         </template>
@@ -989,17 +1125,12 @@ watch(
         <!-- 興趣 -->
         <template #interests>
           <ProfileAboutLifestyleTab
-            :empty-text="
-              getEmptyText('興趣')
-            "
-          />
-        </template>
-
-        <!-- 旅遊 -->
-        <template #travel>
-          <ProfileAboutLifestyleTab
-            :empty-text="
-              getEmptyText('旅遊')
+            ref="interestsTabRef"
+            section="interests"
+            :values="interests"
+            :custom-value="interestOther"
+            @save="
+              emit('saveInterests', $event)
             "
           />
         </template>
@@ -1033,12 +1164,12 @@ watch(
           />
         </template>
 
-        <!-- 你的相關資料 -->
+        <!-- 技術棧 -->
         <template #related>
           <ProfileAboutRelatedTab
             :skills="skills"
             :empty-text="
-              getEmptyText('你的相關資料')
+              getEmptyText('技術棧')
             "
           />
         </template>

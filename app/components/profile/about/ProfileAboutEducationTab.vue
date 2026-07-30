@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type {
-  WorkExperience,
+  EducationExperience,
 } from '~/types/profile'
 import Iconbutton from '~/components/common/button/Iconbutton.vue'
 import RuixenDialog from '~/components/common/dialog/RuixenDialog.vue'
@@ -8,33 +8,34 @@ import LableInput from '~/components/common/forms/LableInput.vue'
 import PromptTextarea from '~/components/common/forms/PromptTextarea.vue'
 import Timeline from '~/components/common/tabs/Timeline.vue'
 
-interface WorkExperienceDraft
-  extends Omit<WorkExperience, 'endDate' | 'tags'> {
+interface EducationExperienceDraft
+  extends Omit<EducationExperience, 'endDate' | 'tags'> {
   endDate: string
   tagsText: string
 }
 
 const props = withDefaults(
   defineProps<{
-    section: 'work' | 'education'
-    work: string
     education: string
-    headline: string
     emptyText: string
-    workExperiences?: WorkExperience[]
+    educationExperiences?: EducationExperience[]
   }>(),
   {
-    workExperiences: () => [],
+    educationExperiences: () => [],
   },
 )
 
 const emit = defineEmits<{
-  saveWorkExperiences: [experiences: WorkExperience[]]
+  saveEducationExperiences: [
+    experiences: EducationExperience[],
+  ]
 }>()
 
 const isDialogOpen = ref(false)
-const workExperienceDrafts = ref<WorkExperienceDraft[]>([])
-const expandedExperienceIds = ref(
+const educationDrafts = ref<
+  EducationExperienceDraft[]
+>([])
+const expandedEducationIds = ref(
   new Set<string>(),
 )
 let draftId = 0
@@ -42,14 +43,15 @@ let draftId = 0
 const createDraftId = () => {
   draftId += 1
 
-  return `work-experience-${Date.now()}-${draftId}`
+  return `education-${Date.now()}-${draftId}`
 }
 
-const createEmptyDraft = (): WorkExperienceDraft => {
+const createEmptyDraft = (
+): EducationExperienceDraft => {
   return {
     id: createDraftId(),
-    company: '',
-    jobTitle: '',
+    school: '',
+    educationLevel: '',
     startDate: '',
     endDate: '',
     description: '',
@@ -58,8 +60,8 @@ const createEmptyDraft = (): WorkExperienceDraft => {
 }
 
 const toDraft = (
-  experience: WorkExperience,
-): WorkExperienceDraft => {
+  experience: EducationExperience,
+): EducationExperienceDraft => {
   return {
     ...experience,
     endDate: experience.endDate || '',
@@ -68,65 +70,63 @@ const toDraft = (
 }
 
 const resetDrafts = () => {
-  workExperienceDrafts.value
-    = props.workExperiences.length
-      ? props.workExperiences.map(toDraft)
+  educationDrafts.value
+    = props.educationExperiences.length
+      ? props.educationExperiences.map(toDraft)
       : [createEmptyDraft()]
 
-  expandedExperienceIds.value = new Set()
+  expandedEducationIds.value = new Set()
 }
 
 const openEditor = () => {
-  if (props.section !== 'work') {
-    return
-  }
-
   resetDrafts()
   isDialogOpen.value = true
 }
 
-const addWorkExperience = () => {
-  workExperienceDrafts.value.push(
+const addEducationExperience = () => {
+  educationDrafts.value.push(
     createEmptyDraft(),
   )
 }
 
-const removeWorkExperience = (
+const removeEducationExperience = (
   index: number,
 ) => {
   const removedDraft
-    = workExperienceDrafts.value[index]
+    = educationDrafts.value[index]
 
-  workExperienceDrafts.value.splice(index, 1)
+  educationDrafts.value.splice(index, 1)
 
-  if (removedDraft) {
-    const nextExpandedIds = new Set(
-      expandedExperienceIds.value,
-    )
-
-    nextExpandedIds.delete(
-      String(removedDraft.id),
-    )
-
-    expandedExperienceIds.value
-      = nextExpandedIds
+  if (!removedDraft) {
+    return
   }
+
+  const nextExpandedIds = new Set(
+    expandedEducationIds.value,
+  )
+
+  nextExpandedIds.delete(
+    String(removedDraft.id),
+  )
+
+  expandedEducationIds.value
+    = nextExpandedIds
 }
 
-const isExperienceExpanded = (
-  id: WorkExperienceDraft['id'],
+const isEducationExpanded = (
+  id: EducationExperienceDraft['id'],
 ) => {
-  return expandedExperienceIds.value.has(
+  return expandedEducationIds.value.has(
     String(id),
   )
 }
 
-const toggleExperience = (
-  id: WorkExperienceDraft['id'],
+const toggleEducation = (
+  id: EducationExperienceDraft['id'],
 ) => {
   const normalizedId = String(id)
   const nextExpandedIds = new Set(
-    expandedExperienceIds.value,
+    expandedEducationIds.value,
   )
 
   if (nextExpandedIds.has(normalizedId)) {
@@ -135,12 +135,12 @@ const toggleExperience = (
     nextExpandedIds.add(normalizedId)
   }
 
-  expandedExperienceIds.value
+  expandedEducationIds.value
     = nextExpandedIds
 }
 
 const hasInvalidDateRange = (
-  draft: WorkExperienceDraft,
+  draft: EducationExperienceDraft,
 ) => {
   return Boolean(
     draft.startDate
@@ -149,11 +149,11 @@ const hasInvalidDateRange = (
   )
 }
 
-const canSaveWorkExperiences = computed(() => {
-  return workExperienceDrafts.value.every((draft) => {
+const canSaveEducationExperiences = computed(() => {
+  return educationDrafts.value.every((draft) => {
     return Boolean(
-      draft.company.trim()
-      && draft.jobTitle.trim()
+      draft.school.trim()
+      && draft.educationLevel.trim()
       && draft.startDate
       && draft.description.trim()
       && !hasInvalidDateRange(draft),
@@ -161,13 +161,13 @@ const canSaveWorkExperiences = computed(() => {
   })
 })
 
-const saveWorkExperiences = () => {
-  if (!canSaveWorkExperiences.value) {
+const saveEducationExperiences = () => {
+  if (!canSaveEducationExperiences.value) {
     return
   }
 
-  const experiences = workExperienceDrafts.value.map(
-    (draft): WorkExperience => {
+  const experiences = educationDrafts.value.map(
+    (draft): EducationExperience => {
       const tags = draft.tagsText
         .split(/[、,，]/)
         .map(tag => tag.trim())
@@ -175,8 +175,9 @@ const saveWorkExperiences = () => {
 
       return {
         id: draft.id,
-        company: draft.company.trim(),
-        jobTitle: draft.jobTitle.trim(),
+        school: draft.school.trim(),
+        educationLevel:
+          draft.educationLevel.trim(),
         startDate: draft.startDate,
         ...(draft.endDate
           ? { endDate: draft.endDate }
@@ -187,71 +188,53 @@ const saveWorkExperiences = () => {
     },
   )
 
-  emit('saveWorkExperiences', experiences)
+  emit(
+    'saveEducationExperiences',
+    experiences,
+  )
   isDialogOpen.value = false
 }
 
-defineExpose({
-  openEditor,
-})
-
 const timelineItems = computed(() => {
-  if (props.section === 'work') {
-    if (props.workExperiences.length) {
-      return [...props.workExperiences]
-        .sort((experienceA, experienceB) => {
-          return experienceA.startDate.localeCompare(
-            experienceB.startDate,
-          )
-        })
-        .map((experience) => {
-          const hasLeftCompany
-            = Boolean(experience.endDate)
+  if (props.educationExperiences.length) {
+    return [...props.educationExperiences]
+      .sort((educationA, educationB) => {
+        return educationA.startDate.localeCompare(
+          educationB.startDate,
+        )
+      })
+      .map((experience) => {
+        const hasGraduated = Boolean(
+          experience.endDate,
+        )
 
-          return {
-            id: experience.id,
-            title: experience.jobTitle,
-            meta: experience.company,
-            timestamp:
-              `${experience.startDate} ~ ${
-                experience.endDate || 'Present'
-              }`,
-            description: experience.description,
-            tags: experience.tags,
-            status: hasLeftCompany
-              ? 'completed' as const
-              : 'active' as const,
-            icon: hasLeftCompany
-              ? 'lucide:check'
-              : 'lucide:briefcase-business',
-          }
-        })
-    }
-
-    if (props.work) {
-      return [
-        {
-          id: 'current-work',
-          title: props.headline || '前端工程師',
-          meta: props.work,
-          timestamp: 'Present',
-          description: '目前任職中',
-          status: 'active' as const,
-          icon: 'lucide:briefcase-business',
-        },
-      ]
-    }
+        return {
+          id: experience.id,
+          title: experience.educationLevel,
+          meta: experience.school,
+          timestamp:
+            `${experience.startDate} ~ ${
+              experience.endDate || 'Present'
+            }`,
+          description: experience.description,
+          tags: experience.tags,
+          status: hasGraduated
+            ? 'completed' as const
+            : 'active' as const,
+          icon: hasGraduated
+            ? 'lucide:check'
+            : 'lucide:graduation-cap',
+        }
+      })
   }
 
-  if (
-    props.section === 'education'
-    && props.education
-  ) {
+  if (props.education) {
     return [
       {
         id: 'current-education',
-        title: props.education,
-        description: '學歷',
+        title: '學歷',
+        meta: props.education,
+        description: '尚未補充詳細學歷',
         status: 'completed' as const,
         icon: 'lucide:graduation-cap',
       },
@@ -259,6 +242,10 @@ const timelineItems = computed(() => {
   }
 
   return []
+})
+
+defineExpose({
+  openEditor,
 })
 </script>
 
@@ -270,16 +257,15 @@ const timelineItems = computed(() => {
     />
 
     <RuixenDialog
-      v-if="section === 'work'"
       v-model="isDialogOpen"
-      title="編輯工作經歷"
-      description="新增、調整或移除工作經歷；結束日期留白會顯示為 Present。"
-      icon="lucide:briefcase-business"
+      title="編輯學歷"
+      description="新增、調整或移除學歷；結束日期留白會顯示為 Present。"
+      icon="lucide:graduation-cap"
       max-width="780px"
       :confirm-disabled="
-        !canSaveWorkExperiences
+        !canSaveEducationExperiences
       "
-      @confirm="saveWorkExperiences"
+      @confirm="saveEducationExperiences"
     >
       <div class="space-y-5">
         <div class="flex justify-end">
@@ -288,34 +274,34 @@ const timelineItems = computed(() => {
             size="compact"
             variant="ghost"
             icon-only
-            aria-label="新增工作經歷"
-            title="新增工作經歷"
-            @click="addWorkExperience"
+            aria-label="新增學歷"
+            title="新增學歷"
+            @click="addEducationExperience"
           />
         </div>
 
         <div
-          v-if="!workExperienceDrafts.length"
+          v-if="!educationDrafts.length"
           class="rounded-xl border border-dashed border-slate-300 px-5 py-10 text-center"
         >
           <Icon
-            name="lucide:briefcase"
+            name="lucide:graduation-cap"
             class="mx-auto size-7 text-slate-400"
           />
 
           <p class="mt-2 text-sm text-slate-500">
-            尚未新增工作經歷
+            尚未新增學歷
           </p>
         </div>
 
         <article
-          v-for="(draft, index) in workExperienceDrafts"
+          v-for="(draft, index) in educationDrafts"
           :key="draft.id"
           class="rounded-xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5"
         >
           <div class="mb-4 flex items-center justify-between gap-3">
             <h3 class="font-semibold text-slate-900">
-              工作經歷 {{ index + 1 }}
+              學歷 {{ index + 1 }}
             </h3>
 
             <div class="flex items-center gap-1">
@@ -326,24 +312,24 @@ const timelineItems = computed(() => {
                 icon-only
                 :animate-icon="false"
                 :icon-class="
-                  isExperienceExpanded(draft.id)
+                  isEducationExpanded(draft.id)
                     ? 'rotate-180 transition-transform duration-300'
                     : 'rotate-0 transition-transform duration-300'
                 "
                 :aria-label="
-                  isExperienceExpanded(draft.id)
-                    ? `收合工作經歷 ${index + 1}`
-                    : `展開工作經歷 ${index + 1}`
+                  isEducationExpanded(draft.id)
+                    ? `收合學歷 ${index + 1}`
+                    : `展開學歷 ${index + 1}`
                 "
                 :aria-expanded="
-                  isExperienceExpanded(draft.id)
+                  isEducationExpanded(draft.id)
                 "
                 :title="
-                  isExperienceExpanded(draft.id)
+                  isEducationExpanded(draft.id)
                     ? '收合'
                     : '展開'
                 "
-                @click="toggleExperience(draft.id)"
+                @click="toggleEducation(draft.id)"
               />
 
               <Iconbutton
@@ -351,9 +337,11 @@ const timelineItems = computed(() => {
                 size="compact"
                 variant="danger-ghost"
                 icon-only
-                :aria-label="`移除工作經歷 ${index + 1}`"
-                :title="`移除工作經歷 ${index + 1}`"
-                @click="removeWorkExperience(index)"
+                :aria-label="`移除學歷 ${index + 1}`"
+                :title="`移除學歷 ${index + 1}`"
+                @click="
+                  removeEducationExperience(index)
+                "
               />
             </div>
           </div>
@@ -361,7 +349,7 @@ const timelineItems = computed(() => {
           <div
             class="grid transition-[grid-template-rows,opacity] duration-300 ease-in-out"
             :class="
-              isExperienceExpanded(draft.id)
+              isEducationExpanded(draft.id)
                 ? 'grid-rows-[1fr] opacity-100'
                 : 'grid-rows-[0fr] opacity-0'
             "
@@ -369,25 +357,24 @@ const timelineItems = computed(() => {
             <div class="min-h-0 overflow-hidden">
               <div class="grid grid-cols-1 gap-4 pt-1 sm:grid-cols-2">
                 <LableInput
-                  :id="`work-company-${draft.id}`"
-                  v-model="draft.company"
-                  label="公司名稱"
-                  placeholder="例如：CodeGram"
+                  :id="`education-school-${draft.id}`"
+                  v-model="draft.school"
+                  label="學校名稱"
+                  placeholder="例如：國立臺北科技大學"
                   autocomplete="organization"
                   required
                 />
 
                 <LableInput
-                  :id="`work-title-${draft.id}`"
-                  v-model="draft.jobTitle"
-                  label="職稱"
-                  placeholder="例如：前端工程師"
-                  autocomplete="organization-title"
+                  :id="`education-level-${draft.id}`"
+                  v-model="draft.educationLevel"
+                  label="教育階段"
+                  placeholder="例如：大學、研究所"
                   required
                 />
 
                 <LableInput
-                  :id="`work-start-date-${draft.id}`"
+                  :id="`education-start-date-${draft.id}`"
                   v-model="draft.startDate"
                   label="開始日期"
                   type="date"
@@ -395,9 +382,9 @@ const timelineItems = computed(() => {
                 />
 
                 <LableInput
-                  :id="`work-end-date-${draft.id}`"
+                  :id="`education-end-date-${draft.id}`"
                   v-model="draft.endDate"
-                  label="結束日期（現職請留白）"
+                  label="結束日期（就讀中請留白）"
                   type="date"
                   :min="draft.startDate || undefined"
                   :error="
@@ -409,31 +396,31 @@ const timelineItems = computed(() => {
 
                 <div class="sm:col-span-2">
                   <LableInput
-                    :id="`work-tags-${draft.id}`"
+                    :id="`education-tags-${draft.id}`"
                     v-model="draft.tagsText"
-                    label="相關技能（選填）"
-                    placeholder="例如：Vue 3、Nuxt、TypeScript"
+                    label="科系或相關領域（選填）"
+                    placeholder="例如：資訊工程、互動設計"
                   />
                 </div>
 
                 <div class="sm:col-span-2">
                   <label
-                    :for="`work-description-${draft.id}`"
+                    :for="`education-description-${draft.id}`"
                     class="mb-2 block text-sm font-semibold text-slate-800"
                   >
-                    工作主要成就
+                    主要學習經歷或成就
 
                     <span class="ml-0.5 text-red-500">*</span>
                   </label>
 
                   <PromptTextarea
-                    :id="`work-description-${draft.id}`"
+                    :id="`education-description-${draft.id}`"
                     v-model="draft.description"
                     :storage-key="`codegram:${draft.id}:description-draft`"
                     :auto-load-draft="false"
                     :rows="4"
                     :maxlength="500"
-                    placeholder="描述工作內容、負責項目與主要成就……"
+                    placeholder="描述學習內容、社團活動、研究方向或主要成就……"
                   />
                 </div>
               </div>
