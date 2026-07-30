@@ -1,5 +1,11 @@
 <script setup lang="ts">
-type ProfileTab = 'posts' | 'about' | 'projects' | 'replies'
+import VercelTabs from '~/components/common/tabs/VercelTabs.vue'
+
+type ProfileTab =
+  | 'posts'
+  | 'about'
+  | 'projects'
+  | 'replies'
 
 defineProps<{
   modelValue: ProfileTab
@@ -35,29 +41,15 @@ const tabs: Array<{
 <template>
   <div class="border-t border-slate-200 px-2 sm:px-4">
     <div class="flex items-center">
-      <div class="min-w-0 flex-1 overflow-x-auto">
-        <div class="flex min-w-max items-center">
-          <button
-            v-for="tab in tabs"
-            :key="tab.value"
-            type="button"
-            class="relative flex h-14 items-center justify-center px-4 text-sm font-semibold transition sm:px-5"
-            :class="
-              modelValue === tab.value
-                ? 'text-blue-600'
-                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
-            "
-            @click="emit('update:modelValue', tab.value)"
-          >
-            {{ tab.label }}
-
-            <span
-              v-if="modelValue === tab.value"
-              class="absolute inset-x-2 bottom-0 h-[3px] rounded-t-full bg-blue-600"
-            />
-          </button>
-        </div>
-      </div>
+      <VercelTabs
+        :model-value="modelValue"
+        :tabs="tabs"
+        aria-label="個人資料分頁"
+        class="min-w-0 flex-1"
+        @update:model-value="
+          emit('update:modelValue', $event)
+        "
+      />
 
       <button
         type="button"

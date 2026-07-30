@@ -23,6 +23,7 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{
+  edit: []
   follow: []
   message: []
 }>()
@@ -116,10 +117,10 @@ const formatNumber = (value: number) => {
         <!-- 改用 Iconbutton -->
         <Iconbutton
           v-if="isOwnProfile"
-          to="/settings/profile"
           icon="lucide:pencil"
           size="compact"
           class="flex-1 md:flex-none"
+          @click="emit('edit')"
         >
           編輯個人資料
         </Iconbutton>
