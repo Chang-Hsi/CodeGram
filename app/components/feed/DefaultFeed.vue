@@ -1,18 +1,22 @@
 <script setup lang="ts">
 import ProfilePostCard from '~/components/profile/ProfilePostCard.vue'
 import ProfilePostComposer from '~/components/profile/ProfilePostComposer.vue'
+import type { PostComposerPayload } from '~/types/postComposer'
+import type { ProfilePost } from '~/types/post'
 
 const currentUser = {
+  id: 'current-user',
   displayName: 'Chang-Hsi',
   username: '1',
   avatarUrl:
     'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=160&q=85',
 }
 
-const posts = [
+const posts = ref<ProfilePost[]>([
   {
-    id: 1,
+    id: '1',
     author: {
+      id: 'yuting',
       displayName: 'Yu-Ting Lin',
       username: 'yuting',
       avatarUrl:
@@ -28,13 +32,14 @@ const posts = [
       'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1000&q=85',
     ],
     likeCount: 128,
-    commentCount: 24,
+    commentCount: 0,
     shareCount: 8,
     liked: false,
   },
   {
-    id: 2,
+    id: '2',
     author: {
+      id: 'alex',
       displayName: 'Alex Chen',
       username: 'alex',
       avatarUrl:
@@ -46,13 +51,14 @@ const posts = [
     visibility: 'public' as const,
     tags: ['DesignSystem', 'TypeScript', 'UIUX'],
     likeCount: 76,
-    commentCount: 13,
+    commentCount: 0,
     shareCount: 4,
     liked: true,
   },
   {
-    id: 3,
+    id: '3',
     author: {
+      id: 'mina',
       displayName: 'Mina Wang',
       username: 'mina',
       avatarUrl:
@@ -67,11 +73,37 @@ const posts = [
       'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=85',
     ],
     likeCount: 203,
-    commentCount: 31,
+    commentCount: 0,
     shareCount: 12,
     liked: false,
   },
-]
+])
+
+async function handleCreatePost(payload: PostComposerPayload) {
+  posts.value.unshift({
+    id: String(Date.now()),
+    author: currentUser,
+    content: payload.content,
+    createdAt: '剛剛',
+    visibility: 'public',
+    tags: payload.tags,
+    images: payload.images,
+    codeSnippets: payload.codeSnippets,
+    likeCount: 0,
+    commentCount: 0,
+    shareCount: 0,
+    liked: false,
+  })
+}
+
+function handleShareCreated(post: ProfilePost) {
+  posts.value.unshift(post)
+}
+
+function updatePost(postId: string, patch: Partial<ProfilePost>) {
+  const post = posts.value.find(item => item.id === postId)
+  if (post) Object.assign(post, patch)
+}
 </script>
 
 <template>
@@ -79,6 +111,8 @@ const posts = [
     <ProfilePostComposer
       :avatar-url="currentUser.avatarUrl"
       :display-name="currentUser.displayName"
+      draft-scope="home-feed"
+      :submit-post="handleCreatePost"
     />
 
     <section
@@ -111,6 +145,11 @@ const posts = [
       v-for="post in posts"
       :key="post.id"
       :post="post"
+      :current-user="currentUser"
+      @share-created="handleShareCreated"
+      @like-change="(postId, liked, likeCount) => updatePost(postId, { liked, likeCount })"
+      @comment-count-change="(postId, commentCount) => updatePost(postId, { commentCount })"
+      @share-count-change="(postId, shareCount) => updatePost(postId, { shareCount })"
     />
   </div>
 </template>

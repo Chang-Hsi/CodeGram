@@ -1,5 +1,4 @@
 import type {
-  LocationCityOption,
   LocationCountryOption,
 } from '../types/location'
 

@@ -3,7 +3,6 @@ import {
   preferredLocationCountryCodes,
 } from '../data/locationOverrides'
 import type {
-  LocationCityOption,
   LocationCountryOption,
 } from '../types/location'
 

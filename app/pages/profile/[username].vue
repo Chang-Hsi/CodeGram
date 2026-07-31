@@ -5,6 +5,8 @@ import type {
   ProfileProject,
   WorkExperience,
 } from "~/types/profile";
+import type { PostComposerPayload } from "~/types/postComposer";
+import type { ProfilePost } from "~/types/post";
 
 definePageMeta({
   layout: false,
@@ -29,6 +31,7 @@ const routeUsername = computed(() => {
 });
 
 const profile = reactive({
+  id: "current-user",
   displayName: "Chang-Hsi",
   username: routeUsername.value,
   headline: "Frontend Engineer・Vue 3 / Nuxt / TypeScript",
@@ -171,15 +174,9 @@ const isOwnProfile = computed(() => {
   return true;
 });
 
-const createProjectImages = (projectKey: string) => {
-  return Array.from({ length: 8 }, (_, index) => {
-    return `https://picsum.photos/seed/codegram-${projectKey}-${index + 1}/960/720`;
-  });
-};
-
 const projects: ProfileProject[] = [
   {
-    id: 1,
+    id: "1",
     name: "TW Douli Portfolio",
     description:
       "個人作品集網站，用來展示個人介紹、服務項目、技術堆疊、參與專案與作品詳情，並針對不同裝置提供響應式瀏覽體驗。",
@@ -285,11 +282,12 @@ const projects: ProfileProject[] = [
   },
 ];
 
-const posts = ref([
+const posts = ref<ProfilePost[]>([
   {
-    id: 1,
+    id: "1",
     kind: "original",
     author: {
+      id: profile.id,
       displayName: profile.displayName,
       username: profile.username,
       avatarUrl: profile.avatarUrl,
@@ -300,14 +298,15 @@ const posts = ref([
     visibility: "public" as const,
     tags: ["Nuxt", "Supabase", "Frontend"],
     likeCount: 36,
-    commentCount: 8,
+    commentCount: 0,
     shareCount: 2,
     liked: true,
   },
   {
-    id: 2,
+    id: "2",
     kind: "original",
     author: {
+      id: profile.id,
       displayName: profile.displayName,
       username: profile.username,
       avatarUrl: profile.avatarUrl,
@@ -321,14 +320,15 @@ const posts = ref([
       "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=85",
     ],
     likeCount: 92,
-    commentCount: 17,
+    commentCount: 0,
     shareCount: 11,
     liked: false,
   },
   {
-    id: 3,
+    id: "3",
     kind: "reply",
     author: {
+      id: profile.id,
       displayName: profile.displayName,
       username: profile.username,
       avatarUrl: profile.avatarUrl,
@@ -339,7 +339,7 @@ const posts = ref([
     visibility: "followers" as const,
     tags: ["Vue3", "Computed", "Watch"],
     likeCount: 24,
-    commentCount: 4,
+    commentCount: 0,
     shareCount: 0,
     liked: false,
   },
@@ -357,24 +357,43 @@ const filteredPosts = computed(() => {
   return posts.value;
 });
 
-const handleCreatePost = (content: string) => {
+const handleCreatePost = async (payload: PostComposerPayload) => {
   posts.value.unshift({
-    id: Date.now(),
+    id: String(Date.now()),
     kind: "original",
     author: {
+      id: profile.id,
       displayName: profile.displayName,
       username: profile.username,
       avatarUrl: profile.avatarUrl,
     },
-    content,
+    content: payload.content,
     createdAt: "剛剛",
     visibility: "public",
-    tags: [],
+    tags: payload.tags,
+    images: payload.images,
+    codeSnippets: payload.codeSnippets,
     likeCount: 0,
     commentCount: 0,
     shareCount: 0,
     liked: false,
   });
+};
+
+const currentPostUser = computed(() => ({
+  id: profile.id,
+  displayName: profile.displayName,
+  username: profile.username,
+  avatarUrl: profile.avatarUrl,
+}));
+
+const handleShareCreated = (post: ProfilePost) => {
+  posts.value.unshift(post);
+};
+
+const updatePost = (postId: string, patch: Partial<ProfilePost>) => {
+  const post = posts.value.find((item) => item.id === postId);
+  if (post) Object.assign(post, patch);
 };
 
 const handleCoverSelected = (file: File) => {
@@ -528,7 +547,8 @@ useSeoMeta({
             v-if="isOwnProfile"
             :avatar-url="profile.avatarUrl"
             :display-name="profile.displayName"
-            @submit="handleCreatePost"
+            :draft-scope="`profile:${profile.username}`"
+            :submit-post="handleCreatePost"
           />
 
           <ProfilePostFilters v-model="activePostFilter" />
@@ -537,6 +557,11 @@ useSeoMeta({
             v-for="post in filteredPosts"
             :key="post.id"
             :post="post"
+            :current-user="currentPostUser"
+            @share-created="handleShareCreated"
+            @like-change="(postId, liked, likeCount) => updatePost(postId, { liked, likeCount })"
+            @comment-count-change="(postId, commentCount) => updatePost(postId, { commentCount })"
+            @share-count-change="(postId, shareCount) => updatePost(postId, { shareCount })"
           />
 
           <div
@@ -628,6 +653,11 @@ useSeoMeta({
           v-for="post in filteredPosts"
           :key="post.id"
           :post="post"
+          :current-user="currentPostUser"
+          @share-created="handleShareCreated"
+          @like-change="(postId, liked, likeCount) => updatePost(postId, { liked, likeCount })"
+          @comment-count-change="(postId, commentCount) => updatePost(postId, { commentCount })"
+          @share-count-change="(postId, shareCount) => updatePost(postId, { shareCount })"
         />
 
         <div

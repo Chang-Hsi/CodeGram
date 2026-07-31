@@ -102,8 +102,12 @@ const focusDialog = async () => {
       focusableSelector,
     )
 
-  firstFocusableElement?.focus()
-    ?? dialogRef.value?.focus()
+  if (firstFocusableElement) {
+    firstFocusableElement.focus()
+  }
+  else {
+    dialogRef.value?.focus()
+  }
 }
 
 const closeDialog = () => {

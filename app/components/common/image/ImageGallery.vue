@@ -46,6 +46,8 @@ const props = withDefaults(
     defaultAspectRatio?: string
     emptyText?: string
     rootMargin?: string
+    layout?: 'masonry' | 'post'
+    maxVisible?: number
   }>(),
   {
     columns: 4,
@@ -55,6 +57,8 @@ const props = withDefaults(
     defaultAspectRatio: '4 / 3',
     emptyText: '目前沒有相片。',
     rootMargin: '120px 0px',
+    layout: 'masonry',
+    maxVisible: 4,
   },
 )
 
@@ -147,6 +151,27 @@ const columnClass = computed(() => {
 
   return columnClassMap[props.columns]
 })
+
+const displayedImages = computed(() => (
+  props.layout === 'post'
+    ? normalizedImages.value.slice(0, Math.max(1, props.maxVisible))
+    : normalizedImages.value
+))
+
+const hiddenImageCount = computed(() => (
+  Math.max(0, normalizedImages.value.length - displayedImages.value.length)
+))
+
+const postGalleryClass = computed(() => {
+  const count = displayedImages.value.length
+  if (count === 1) return 'grid-cols-1 h-[min(72vw,34rem)]'
+  if (count === 2) return 'grid-cols-2 h-[min(58vw,30rem)]'
+  return 'grid-cols-2 grid-rows-2 h-[min(90vw,38rem)] sm:h-[34rem]'
+})
+
+const postImageClass = (index: number) => (
+  displayedImages.value.length === 3 && index === 0 ? 'row-span-2' : ''
+)
 
 const activePreviewImage = computed(() => {
   if (previewIndex.value === null) {
@@ -515,7 +540,71 @@ onBeforeUnmount(() => {
 <template>
   <div class="w-full">
     <div
-      v-if="normalizedImages.length"
+      v-if="layout === 'post' && normalizedImages.length"
+      class="grid overflow-hidden bg-slate-200"
+      :class="postGalleryClass"
+      :style="{ gap: `${gap}px` }"
+    >
+      <figure
+        v-for="(image, index) in displayedImages"
+        :key="image.id"
+        :ref="element => setItemRef(image.id, element)"
+        :data-gallery-image-id="image.id"
+        class="group relative min-h-0 min-w-0 overflow-hidden bg-slate-100"
+        :class="postImageClass(index)"
+      >
+        <button
+          type="button"
+          class="relative block size-full overflow-hidden text-left outline-none focus-visible:z-10 focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-blue-500"
+          :aria-label="`查看${image.alt}`"
+          @click="openPreview(image)"
+        >
+          <span
+            v-if="!isImageLoaded(image) && !isImageFailed(image)"
+            class="absolute inset-0 animate-pulse bg-slate-200"
+            aria-hidden="true"
+          >
+            <span class="absolute inset-0 -translate-x-full animate-[gallery-shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/55 to-transparent" />
+          </span>
+
+          <img
+            v-show="!isImageFailed(image)"
+            :src="getImageSource(image)"
+            :alt="image.alt"
+            loading="lazy"
+            decoding="async"
+            class="absolute inset-0 size-full object-cover transition-[opacity,transform] duration-500 group-hover:scale-[1.015]"
+            :class="isImageLoaded(image) ? 'opacity-100' : 'opacity-0'"
+            @load="handleImageLoad(image)"
+            @error="handleImageError(image)"
+          >
+
+          <span
+            v-if="isImageFailed(image)"
+            class="absolute inset-0 flex flex-col items-center justify-center bg-slate-100 text-slate-400"
+          >
+            <Icon name="lucide:image-off" class="size-7" />
+            <span class="mt-2 text-xs">相片載入失敗</span>
+          </span>
+
+          <span
+            class="pointer-events-none absolute inset-0 bg-slate-950/0 transition group-hover:bg-slate-950/10"
+            aria-hidden="true"
+          />
+
+          <span
+            v-if="index === displayedImages.length - 1 && hiddenImageCount"
+            class="pointer-events-none absolute inset-0 flex items-center justify-center bg-slate-950/55 text-3xl font-semibold text-white"
+            aria-hidden="true"
+          >
+            +{{ hiddenImageCount }}
+          </span>
+        </button>
+      </figure>
+    </div>
+
+    <div
+      v-else-if="normalizedImages.length"
       :class="columnClass"
       :style="{
         columnGap: `${gap}px`,
