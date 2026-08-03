@@ -436,6 +436,20 @@ onBeforeUnmount(() => {
         :is-duplicate="item.isDuplicate"
       >
         <span
+          v-if="item.icon"
+          class="inline-flex size-12 items-center justify-center rounded-2xl border border-white/80 bg-white/95 shadow-[0_8px_24px_rgba(15,23,42,0.14)] ring-1 ring-slate-200/70 backdrop-blur transition-transform duration-200 hover:scale-110 sm:size-14"
+          :title="item.label"
+        >
+          <Icon
+            :name="item.icon"
+            class="size-7 sm:size-8"
+            aria-hidden="true"
+          />
+          <span class="sr-only">{{ item.label }}</span>
+        </span>
+
+        <span
+          v-else
           class="inline-flex whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-sm"
         >
           {{ item.label }}

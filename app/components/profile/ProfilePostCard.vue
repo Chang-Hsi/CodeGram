@@ -13,6 +13,10 @@ const props = defineProps<{
   currentUser?: PostAuthor
 }>()
 
+defineSlots<{
+  media?: (props: { post: ProfilePost }) => unknown
+}>()
+
 const emit = defineEmits<{
   likeChange: [postId: string, liked: boolean, count: number]
   commentCountChange: [postId: string, count: number]
@@ -216,13 +220,15 @@ function closeShareDialog() {
       class="mx-4 mb-4"
     />
 
-    <ImageGallery
-      v-if="post.images?.length"
-      :images="galleryImages"
-      layout="post"
-      :gap="2"
-      :max-visible="4"
-    />
+    <slot name="media" :post="post">
+      <ImageGallery
+        v-if="post.images?.length"
+        :images="galleryImages"
+        layout="post"
+        :gap="2"
+        :max-visible="4"
+      />
+    </slot>
 
     <div class="px-4">
       <div class="flex min-h-11 items-center justify-between gap-4 text-sm text-slate-500">
